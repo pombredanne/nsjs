@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+BIN=`dirname $0`
+ROOT=$BIN/..
+SRC=$ROOT/src
+DIST=$ROOT/dist
+VERSION=`cat $ROOT/VERSION`
+
+rm -rf $DIST
+mkdir -p $DIST
+OUT=$DIST/ns-$VERSION.js
+
+yui-compressor $SRC/core.js >> $OUT
+yui-compressor $SRC/dom.js >> $OUT
+yui-compressor $SRC/code.js >> $OUT
+yui-compressor $SRC/test.js >> $OUT
+

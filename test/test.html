@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+<script src="../src/core.js"></script>
+<script src="../src/dom.js"></script>
+<script src="../src/test.js"></script>
+<style>
+.results          { display: table; font-family: monospace; border: 1px solid #999; border-width: 1px 0 0 1px; }
+.results>.header  { display: table-cell; border: 1px solid #CCC; border-width: 0 1px 1px 0; padding: .2em .4em; background-color: #999; color: #FFF }
+.result    { display: table-row; }
+.result>*  { display: table-cell; border: 1px solid #999; border-width: 0 1px 1px 0; padding: .2em .4em; }
+.result>ol { list-style: none }
+</style>
+</head>
+<body>
+<h2><code>elem(x)</code></h2>
+<script>
+put(tests(elem,
+    [function() { return this.tagName == "SPAN" }, "span"],
+    [function() { return this.tagName == "DIV" }, "div"],
+    [function() { return this.tagName == "DIV" && this.className == "foo" }, "div", {"class": "foo"}]
+));
+</script>
+<h2><code>hex(x)</code></h2>
+<script>
+put(tests(hex,
+    ["-F4240", -1000000], ["-186A0", -100000], ["-2710", -10000],
+    ["-3E8", -1000], ["-64", -100], ["-A", -10], ["-1", -1], ["0", 0],
+    ["1", 1], ["2", 2], ["3", 3], ["4", 4], ["5", 5], ["6", 6], ["7", 7],
+    ["8", 8], ["9", 9], ["A", 10], ["B", 11], ["C", 12], ["D", 13], ["E", 14],
+    ["F", 15], ["10", 16], ["11", 17], ["12", 18], ["13", 19], ["14", 20]
+));
+test(hex, "1E", 30);
+test(hex, "28", 40);
+test(hex, "32", 50);
+test(hex, "3C", 60);
+test(hex, "46", 70);
+test(hex, "50", 80);
+test(hex, "5A", 90);
+test(hex, "64", 100);
+test(hex, "C8", 200);
+test(hex, "12C", 300);
+test(hex, "190", 400);
+test(hex, "1F4", 500);
+test(hex, "3E8", 1000);
+test(hex, "2710", 10000);
+test(hex, "186A0", 100000);
+test(hex, "F4240", 1000000);
+</script>
+</body>
+</html>
