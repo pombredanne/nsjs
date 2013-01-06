@@ -41,6 +41,10 @@ each([1, 2, 3], function(n) {
 Apply syntax highlighting in the language specified to all <code> tags on or
 below the element provided.
 
+Languages currently supported:
+
+* Python
+
 {{{
 each($T("pre"), function(item) {
     if (item.hasClass("python"))
