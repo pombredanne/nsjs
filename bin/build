@@ -15,3 +15,5 @@ yui-compressor $SRC/dom.js >> $OUT
 yui-compressor $SRC/code.js >> $OUT
 yui-compressor $SRC/test.js >> $OUT
 
+ln -s ns-$VERSION.js $DIST/ns.js
+
