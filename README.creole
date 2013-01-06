@@ -1,6 +1,6 @@
 = nsjs
 
-A JavaScript framework with batteries included.
+A pragmatic JavaScript library with batteries included.
 
 == each(iterable, func)
 
