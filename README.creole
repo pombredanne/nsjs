@@ -1,0 +1,46 @@
+= nsjs
+
+A JavaScript framework with batteries included.
+
+== each(iterable, func)
+
+A looping construct which can be used on arrays, objects and other collections.
+For each item in the iterable, a call is made the function provided, passing in
+the value of the item itself followed by its key or index.
+
+each([1, 2, 3], function(n) {
+    writeln("Number " + n);
+});
+
+== hex
+
+== mod
+
+== type
+
+== zfill
+
+== text
+
+== elem
+
+== build
+
+== put
+
+== write
+
+== writeln
+
+== walk
+
+== code(element, lang)
+
+Apply syntax highlighting in the language specified to all <code> tags on or
+below the element provided.
+
+each($T("pre"), function(item) {
+    if (item.hasClass("python"))
+        code(item, "python");
+});
+
