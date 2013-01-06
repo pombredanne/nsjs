@@ -81,8 +81,14 @@ function walk(f) {
 Element.prototype.walk = walk;
 
 function hasClass(x) {
-    var k=this.getAttribute("class").split(" ")
-    for(var i=0;i<k.length;++i){if(k==x)return true}
+    var k = this.getAttribute("class");
+    if (k == null)
+        return false;
+    k = k.split(" ")
+    for (var i = 0; i < k.length; ++i) {
+        if (k == x)
+            return true;
+    }
     return false;
 }
 Element.prototype.hasClass = hasClass;
