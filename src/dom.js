@@ -5,8 +5,10 @@ function id(x) {
     return doc.getElementById(x);
 }
 
-function tag(tagName) {
-    return doc.getElementsByTagName(tagName);
+function tag(tagName, parent) {
+    if (parent == null)
+        parent = doc;
+    return parent.getElementsByTagName(tagName);
 }
 
 if (doc.getElementsByClassName) {
@@ -28,7 +30,8 @@ if (doc.getElementsByClassName) {
         var allElements = parent.getElementsByTagName("*"),
             elements = [];
         for (var i = 0; i < allElements.length; ++i) {
-            var klass = allElements[i].getAttribute("class"), match = true;
+            var klass = allElements[i].getAttribute("class"),
+                match = true;
             if (klass != null && klass.length >= 0) {
                 for (var p = 0; p < patterns.length; ++p) {
                     if (!patterns[p].test(klass))
@@ -111,24 +114,11 @@ function walk(f) {
 Element.prototype.walk = walk;
 
 function hasClass(x) {
-    var k = this.getAttribute("class");
-    if (k == null)
-        return false;
-    k = k.split(" ");
-    for (var i = 0; i < k.length; ++i) {
-        if (k[i] == x)
-            return true;
-    }
-    return false;
-}
-Element.prototype.hasClass = hasClass;
-
-function hasClass2(x) {
-    var elements = this.parentElement.getElementsByClassName(x);
+    var elements = cls(x, this.parentElement);
     for (var i = 0; i < elements.length; ++i) {
         if (elements[i] === this)
             return true;
     }
     return false;
 }
-Element.prototype.hasClass2 = hasClass2;
+Element.prototype.hasClass = hasClass;

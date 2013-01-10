@@ -5,11 +5,15 @@ function type(x) {
         return m[1];
 }
 
-function repeat(x, times) {
+function rarr(x, times) {
     var out = [];
     for (var i = 0; i < times; ++i)
         out.push(x)
-    return out.join("");
+    return out;
+}
+
+function rstr(x, times) {
+    return rarr(x, times).join("");
 }
 
 /*

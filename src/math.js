@@ -1,8 +1,16 @@
 
+function bin(x) {
+    return x.toString(2);
+}
+
 function cyc(p, q) {
     return p < 0 ?
            (p % q + q) % q :
            p % q;
+}
+
+function hex(x) {
+    return x.toString(16);
 }
 
 function range(start, stop, step) {

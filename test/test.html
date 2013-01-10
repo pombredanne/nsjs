@@ -2,7 +2,8 @@
 <html>
 <head>
 <script src="../src/math.js"></script>
-<script src="../src/core.js"></script>
+<script src="../src/time.js"></script>
+<script src="../src/lang.js"></script>
 <script src="../src/dom.js"></script>
 <script src="../src/test.js"></script>
 <style>
@@ -30,9 +31,9 @@ put(tests(type,
 ));
 </script>
 
-<h2><code>repeat(x, times)</code></h2>
+<h2><code>rstr(x, times)</code></h2>
 <script>
-put(tests(repeat,
+put(tests(rstr,
     ["AAAAAAA", "A", 7], ["A", "A", 1], ["", "A", 0], ["", "", 7],
     ["", "", 1], ["", "", 0], ["ABCABCABC", "ABC", 3], ["", "ABC", 0],
     ["9999999", 9, 7], ["999999", 99, 3], ["truetruetrue", true, 3]
@@ -47,6 +48,10 @@ put(tests(elem,
     [function() { return this.tagName == "DIV" && this.className == "foo" }, "div", {"class": "foo"}]
 ));
 </script>
+
+<div id="foo" class="big red thing">
+    <div class="inner thing"></div>
+</div>
 
 </body>
 </html>
