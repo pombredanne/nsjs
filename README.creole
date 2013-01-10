@@ -103,7 +103,12 @@ Create a text node containing the text `x`.
 === elem(tag, [attrs])
 
 Create an element of type {{{tag}}}, optionally with the attributes
-supplied by {{{attrs}}}`.
+supplied by {{{attrs}}}.
+
+{{{
+var foo = elem("div");
+var bar = elem("span", {"class": "foo"});
+}}}
 
 === build
 
