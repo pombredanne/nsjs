@@ -5,6 +5,7 @@
 <script src="../src/dom.js"></script>
 <script src="../src/code.js"></script>
 <style>
+pre, code { font-family: Ubuntu Mono }
 pre.python .keyword { color: #933; font-weight: bold }
 pre.python .function { color: #090; }
 pre.python .number { color: #960; }
@@ -1818,9 +1819,9 @@ class Index(rest.Resource):
 
 <script>
 
-each($T("pre"), function(item) {
-    if (item.hasClass("python"))
-        code(item, "python");
+each(tag("pre"), function() {
+    if (this.hasClass("python"))
+        code(this, "python");
 });
 
 </script>

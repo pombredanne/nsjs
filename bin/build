@@ -10,6 +10,7 @@ rm -rf $DIST
 mkdir -p $DIST
 OUT=$DIST/ns-$VERSION.js
 
+yui-compressor $SRC/math.js >> $OUT
 yui-compressor $SRC/core.js >> $OUT
 yui-compressor $SRC/dom.js >> $OUT
 yui-compressor $SRC/code.js >> $OUT

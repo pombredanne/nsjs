@@ -1,18 +1,48 @@
 
 window.doc = window.document;
 
-function $(i) {
-    return doc.getElementById(i);
+function id(x) {
+    return doc.getElementById(x);
 }
 
-function $N(i) {
-    return doc.getElementsByName(i);
+function tag(tagName) {
+    return doc.getElementsByTagName(tagName);
 }
 
-function $T(t) {
-    return doc.getElementsByTagName(t);
-}
+if (doc.getElementsByClassName) {
 
+    window.cls = function(classNames, parent) {
+        if (parent == null)
+            parent = doc;
+        return parent.getElementsByClassName(classNames);
+    }
+
+} else {
+    
+    window.cls = function(classNames, parent) {
+        if (parent == null)
+            parent = doc;
+        var patterns = each(classNames.trim().split(/\s+/), function() {
+            return new RegExp("\\b" + classNames + "\\b");
+        });
+        var allElements = parent.getElementsByTagName("*"),
+            elements = [];
+        for (var i = 0; i < allElements.length; ++i) {
+            var klass = allElements[i].getAttribute("class"), match = true;
+            if (klass != null && klass.length >= 0) {
+                for (var p = 0; p < patterns.length; ++p) {
+                    if (!patterns[p].test(klass))
+                        match = false;
+                        break;
+                }
+                if (match)
+                    elements.push(allElements[i]);
+            }
+        }
+        return elements;
+    }
+    
+}
 
 /*
  * Create a text node
@@ -84,12 +114,21 @@ function hasClass(x) {
     var k = this.getAttribute("class");
     if (k == null)
         return false;
-    k = k.split(" ")
+    k = k.split(" ");
     for (var i = 0; i < k.length; ++i) {
-        if (k == x)
+        if (k[i] == x)
             return true;
     }
     return false;
 }
 Element.prototype.hasClass = hasClass;
 
+function hasClass2(x) {
+    var elements = this.parentElement.getElementsByClassName(x);
+    for (var i = 0; i < elements.length; ++i) {
+        if (elements[i] === this)
+            return true;
+    }
+    return false;
+}
+Element.prototype.hasClass2 = hasClass2;

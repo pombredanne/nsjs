@@ -7,13 +7,18 @@ function test() {
         func = args.shift(),
         expected = args.shift();
     var argsText = [];
-    for (var i = 0; i < args.length; ++i)
-        argsText.push(JSON.stringify(args[i]));
+    for (var i = 0; i < args.length; ++i) {
+        try {
+            argsText.push(JSON.stringify(args[i]));
+        } catch (e) {
+            argsText.push("" + args[i]);
+        }
+    }
     var result = {"function": func.name, "arguments": argsText.join(",")};
-    result["actual"] = func.apply(null, args);
+    result["actual"] = func.apply(undefined, args);
     if (type(expected) == "Function") {
-        result["pass"] = expected.call(result["actual"]);
-    } else if (result["actual"] == expected || (isNaN(result["actual"]) && isNaN(expected))) {
+        result["pass"] = expected(result["actual"]);
+    } else if (result["actual"] == expected || (result["actual"] === NaN && expected === NaN)) {
         result["pass"] = true;
     } else {
         result["pass"] = false;

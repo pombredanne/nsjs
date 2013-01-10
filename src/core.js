@@ -1,51 +1,44 @@
 
-/*
- * Doubles up as map and foreach construct
- */
-function each(iterable, func) {
-    var t = type(iterable),
-        out = [];
-    if (t == "Array" || t == "HTMLCollection" || t == "NodeList") {
-        for (var i = 0; i < iterable.length; ++i)
-            out.push(func.call(this, iterable[i], i, i));
-    } else {
-        var i = 0;
-        for (var k in iterable) {
-            out.push(func.call(this, iterable[k], k, i));
-            i++;
-        }
-    }
-    return out;
-}
-
-function hex(x) {
-    if (x == 0)
-        return "0";
-    if (x < 0)
-        return "-" + hex(-x);
-    var h = "";
-    while (x > 0) {
-        h = "0123456789ABCDEF".charAt(x % 16) + h;
-        x = Math.floor(x / 16);
-    }
-    return h;
-}
-
-function mod(p, q) {
-    while (p < 0)
-        p += q
-    return p % q
-}
-
 function type(x) {
     var m = /^\[object ([0-9A-Za-z_]+)\]$/.exec(Object.prototype.toString.call(x));
     if (m)
         return m[1];
 }
 
-function zfill(s, width) {
-    while (s.length < width)
-        s = "0" + s
-    return s
+function repeat(x, times) {
+    var out = [];
+    for (var i = 0; i < times; ++i)
+        out.push(x)
+    return out.join("");
 }
 
+/*
+ * each(doc.body.children, function() { return this.tagName }, String.prototype.toLowerCase)
+ * 
+ */
+function each() {
+    if (arguments[0] === undefined || arguments[0] === null)
+        return arguments[0];
+    var data = arguments[0],
+        t = type(data)
+        numArgs = arguments.length;
+    if (t == "Array" || t == "HTMLCollection" || t == "NodeList") {
+        for (var arg = 1; arg < numArgs; ++arg) {
+            var out = [];
+            for (var index = 0; index < data.length; ++index)
+                out.push(arguments[arg].call(data[index], data[index], index, index));
+            data = out;
+        }
+    } else if (t == "Boolean" || t == "Number" || t == "String") {
+        for (var arg = 1; arg < numArgs; ++arg)
+            data = arguments[arg].call(data, undefined, 0);
+    } else {
+        for (var arg = 1; arg < numArgs; ++arg) {
+            var out = {}, index = 0;
+            for (var key in data)
+                out[key] = arguments[arg].call(data[key], data[key], key, index++);
+            data = out;
+        }
+    }
+    return data;
+}
