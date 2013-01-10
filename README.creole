@@ -132,9 +132,9 @@ Languages currently supported:
 * Python
 
 {{{
-each(tag("pre"), function(item) {
-    if (item.hasClass("python"))
-        code(item, "python");
+each(tag("pre"), function() {
+    if (this.hasClass("python"))
+        code(this, "python");
 });
 }}}
 
