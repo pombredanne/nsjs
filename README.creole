@@ -8,20 +8,20 @@ One JS file to rule them all.
 
 === cyc(x, size)
 
-Convert `x` to a number between 0 and size - 1 based on a repeating
+Convert {{{x}}} to a number between 0 and size - 1 based on a repeating
 cycle along a number line. For zero and positive integers, this
-produces the same result as the modulo (`%`) operator. For negative
-numbers, the formula `(x % size + size) % size` applies.
+produces the same result as the modulo ({{{%}}}) operator. For negative
+numbers, the formula {{{(x % size + size) % size}}} applies.
 
 Assuming size 4, the following transformations would occur:
 
-```
+{{{
                      x
   -6 -5 -4 -3 -2 -1  0 +1 +2 +3 +4 +5 +6
 <--+--+--+--+--+--+--+--+--+--+--+--+--+-->
    2  3  0  1  2  3  0  1  2  3  0  1  2
                  cyc(x, 4)
-```
+}}}
 
 === hex
 
@@ -37,7 +37,7 @@ Assuming size 4, the following transformations would occur:
 
 A looping construct which can be used on arrays, array-like objects,
 simple objects and single values. Functionality includes that provided
-by both `forEach` loops and the `map` function.
+by both {{{forEach}}} loops and the {{{map}}} function.
 
 Each item within the input data is passed sequentially through the
 functions provided, returning the final output value within a
@@ -84,17 +84,17 @@ Return a string identifying the type of an object or value.
 
 === id(x)
 
-Shorter alias for `getElementById(x)`.
+Shorter alias for {{{getElementById(x)}}}.
 
 === tag(x, [parent])
 
-Shorter alias for `getElementsByTagName(x)`, optionally within the
-supplied `parent` element.
+Shorter alias for {{{getElementsByTagName(x)}}}, optionally within the
+supplied {{{parent}}} element.
 
 === cls(x, [parent])
 
-Shorter alias for `getElementsByClassName(x)`, optionally within the
-supplied `parent` element.
+Shorter alias for {{{getElementsByClassName(x)}}}, optionally within the
+supplied {{{parent}}} element.
 
 === text(x)
 
@@ -102,8 +102,8 @@ Create a text node containing the text `x`.
 
 === elem(tag, [attrs])
 
-Create an element of type `tag`, optionally with the attributes
-supplied by `attrs`.
+Create an element of type {{{tag}}}, optionally with the attributes
+supplied by {{{attrs}}}`.
 
 === build
 
@@ -119,8 +119,8 @@ supplied by `attrs`.
 
 === code(element, lang)
 
-Apply syntax highlighting in the language specified to all <code> tags
-on or below the element provided.
+Apply syntax highlighting in the language specified to all {{{<code>}}}
+tags on or below the element provided.
 
 Languages currently supported:
 
