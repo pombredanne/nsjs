@@ -129,6 +129,7 @@ tags on or below the element provided.
 
 Languages currently supported:
 
+* Cypher
 * Python
 
 {{{

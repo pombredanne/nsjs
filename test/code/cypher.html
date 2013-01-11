@@ -1,0 +1,270 @@
+<!doctype html>
+<html>
+<head>
+<script src="../../src/math.js"></script>
+<script src="../../src/time.js"></script>
+<script src="../../src/lang.js"></script>
+<script src="../../src/dom.js"></script>
+<script src="../../src/code.js"></script>
+<style>
+#editor, #viewer {
+    font-family: Ubuntu Mono, monospaced;
+    font-size: 12pt;
+    width: 560px;
+    border-width: 0px;
+    overflow: auto;
+    background-color: #DDD;
+    height: 400px;
+    margin: 0;
+    padding: .75em 1em;
+    border: 1px solid #333;
+    outline: 0;
+    display: block;
+    white-space: pre;
+}
+code .keyword { color: #630019; font-weight: bold }
+code .function { color: #0087BD; }
+code .number { color: #806A00; }
+code .constant { color: #806A00; font-weight: bold; }
+code .declaration { font-weight: bold; }
+code .comment { color: #999; }
+code .string { color: #1A6900; }
+code .escaped { color: #E34400; }
+code .parameter { color: #6400C2; }
+code .pattern { color: #0013BF; }
+</style>
+</head>
+<body>
+<h1>Cypher Syntax Highlighting Test Page</h1>
+
+<table cellspacing="10" cellpadding="0"><tr><td style="width:50%;vertical-align:top">
+<h2>Cypher Editor</h2>
+<textarea id="editor">
+START n=node(3, 1)
+WHERE has(n.belt)
+RETURN n
+
+START a=node(1), b=node(3, 2)
+MATCH a&lt;-[r?]-b
+WHERE r is null
+RETURN b
+
+START a=node(1), b=node(3, 2)
+MATCH a&lt;-[r?]-b
+WHERE r is not null
+RETURN b
+
+START a=node(1), b=node(3, 2)
+MATCH a&lt;-[r?]-b
+WHERE not(is null r)
+RETURN b
+
+START a=node(1), b=node(3, 2)
+MATCH a&lt;-[r?]-b
+WHERE r = true
+RETURN b
+
+START n=node(3, 1)
+WHERE n.name =~ 'Some\\/thing'
+RETURN n
+
+START n=node(3, 1)
+WHERE (n.age &lt; 30 and n.name = "Tobias") or not(n.name = "Tobias")
+RETURN n
+
+START person=node:Person(name = 'Anakin')
+RETURN person
+
+START person=node:Person(name = 'Anakin')
+MATCH person-[:email]->email
+RETURN email
+
+START person=node:Person(name = 'Bridget')
+MATCH person-[r:belongs_to]->group
+RETURN group, r
+
+START person=node:Person(name = 'Bridget\\')
+MATCH person-[r:`belongs_to-[]->`]->group
+RETURN group, r
+
+START person=node:Person('name: *')
+MATCH person-[?:email]->email
+RETURN person.name, email.address?
+
+START person=node:Person('name: Bridget O\'Reilly')
+MATCH person-[:belongs_to*]->group
+RETURN person.name, group.name
+
+START person=node:Person('name: *')
+WHERE person.age > 35 AND person.hair = 'blonde'
+RETURN person
+
+START person=node:Person('name: *')
+RETURN person.name, count(*)
+ORDER BY person.name
+
+START root=node(2)
+CREATE UNIQUE root-[r:X {since:'forever'}]-()
+RETURN r
+
+start n=node(0,1,2)
+return n.name
+skip {s} limit {l}
+
+start n=node(0,1,2)
+where n.name =~ {regex}
+return n.name
+
+START r=relationship:rels(name = "Andr&eacute;s")
+RETURN r
+
+START a=node(2)
+MATCH a-->b
+RETURN count(distinct b.eyes)
+
+START n=node(2,3,4,1)
+RETURN collect(n.property?)
+
+START n=node(2,3,4)
+RETURN min(n.property)
+
+START n=node(2,3,4)
+RETURN max(n.property)
+
+START n=node(2,3,4)
+RETURN percentile_cont(n.property, 0.4)
+
+START n=node(2,3,4)
+RETURN percentile_disc(n.property, 0.5)
+
+START n=node(2)
+MATCH (n)-->(x)
+RETURN count(x)
+
+START a=node(4), x=node(3)
+MATCH p = shortestPath( a-[?*]->x )
+RETURN p
+
+START a=node(3), b=node(1)
+MATCH p=a-[*1..3]->b
+WHERE all(x in nodes(p)
+WHERE x.age > 30)
+RETURN p
+
+START a=node(2)
+WHERE any(x in a.array
+WHERE x = "one")
+RETURN a
+
+START n=node(3)
+MATCH p=n-[*1..3]->b
+WHERE NONE(x in nodes(p)
+WHERE x.age = 25)
+RETURN p
+
+START n=node(3)
+MATCH p=n-->b
+WHERE SINGLE(var in nodes(p)
+WHERE var.eyes = "blue")
+RETURN p
+
+START a=node(3)
+MATCH p=a-->b-->c
+RETURN length(p)
+
+START n=node(3)
+MATCH (n)-[r]->()
+RETURN type(r)
+
+START a=node(3, 4, 5)
+RETURN ID(a)
+
+START a=node(3)
+RETURN coalesce(a.hairColour?, a.eyes?)
+
+START a=node(2)
+RETURN a.array, head(a.array)
+
+START a=node(2)
+RETURN a.array, last(a.array)
+
+START a=node(3), c=node(2)
+MATCH p=a-->b-->c
+RETURN NODES(p)
+
+START a=node(3), c=node(2)
+MATCH p=a-->b-->c
+RETURN RELATIONSHIPS(p)
+
+START a=node(3), b=node(4), c=node(1)
+MATCH p=a-->b-->c
+RETURN extract(n in nodes(p) : n.age)
+
+START a=node(2)
+RETURN a.array, filter(x in a.array : length(x) = 3)
+
+START a=node(2)
+RETURN a.array, tail(a.array)
+
+START n=node(1)
+RETURN range(0,10), range(2,18,3)
+
+START a=node(3), b=node(4), c=node(1)
+MATCH p=a-->b-->c
+RETURN reduce(totalAge = 0, n in nodes(p) : totalAge + n.age)
+
+START n=node(1) RETURN b //This is an end of line comment
+START n=node(1)
+//This is a whole line comment
+RETURN b
+START n=node(1) WHERE n.property = "//This is NOT a comment" RETURN b
+
+CREATE center
+foreach( x in range(1,6) :
+ 
+CREATE leaf={count : x}, center-[:X]->leaf
+)
+==== center ====
+MATCH leaf1<--center-->leaf2
+WHERE id(leaf1)&lt;id(leaf2)
+CREATE leaf1-[:X]->leaf2
+==== center ====
+MATCH center-[r]->()
+DELETE center,r;
+
+START david=node(1)
+MATCH david--otherPerson-->()
+========== otherPerson, count(*) as foaf ==========
+SET otherPerson.connection_count = foaf
+</textarea>
+</td><td style="width:50%;vertical-align:top">
+<h2>Cypher Viewer</h2>
+<code id="viewer"></pre>
+</td></tr></table>
+
+<script>
+
+each(tag("pre"), function() {
+    if (this.hasClass("cypher"))
+        code(this, "cypher");
+});
+
+var editor = id("editor"),
+    viewer = id("viewer");
+
+function mirror() {
+    viewer.clear();
+    viewer.write(editor.value);
+    code(viewer, "cypher");
+}
+
+editor.onkeyup = mirror;
+
+mirror();
+editor.scrollTop = 0;
+viewer.scrollTop = 0;
+
+</script>
+
+</body>
+</html>

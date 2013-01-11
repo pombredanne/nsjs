@@ -91,6 +91,12 @@ function put() {
 }
 Element.prototype.put = put;
 
+function clear() {
+    while (this.firstChild)
+        this.removeChild(this.firstChild);
+}
+Element.prototype.clear = clear;
+
 function write() {
     for (var i = 0; i < arguments.length; ++i)
         put.call(this, text(arguments[i]));
