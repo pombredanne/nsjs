@@ -1,77 +1,74 @@
 
 function code(x, lang) {
     
+    var CYPHER_CHUNKS = /(\\\\|\/\*|\*\/|\/\/|\\"|"|\\'|'|\\`|`|\{[0-9A-Z_]+\}|\r|\n)/gim,
+        CYPHER_TOKENS = /(create unique|is not|order by|[A-Z_][0-9A-Z_]*|={3,}|0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*|<?--+>?|<?-+\[|\]-+>?)/gi,
+        CYPHER_VOCAB = {
+            "number":   /^(0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*)$/,
+            "constant": /^(true|false|null)$/i,
+            "pattern":  /^(<?--+>?|<?-+\[|\]-+>?)$/,
+            "keyword":  /^(and|as|asc|create unique|create|delete|desc|distinct|in|is|is not|limit|match|or|order by|relate|return|set|skip|start|unique|where|with|={3,})$/i,
+            "function": /^(abs|any|all|avg|coalesce|collect|count|extract|filter|foreach|has|head|id|last|left|length|lower|ltrim|max|min|node|nodes|none|not|percentile_cont|percentile_disc|range|reduce|rel|relationship|relationships|replace|right|round|rtrim|shortestPath|sign|single|sqrt|str|substring|sum|tail|trim|type|upper)$/i
+        },
+        COMMENT_SPAN   = '<span class="comment">',
+        ESCAPED_SPAN   = '<span class="escaped">',
+        PARAMETER_SPAN = '<span class="parameter">',
+        STRING_SPAN    = '<span class="string">',
+        END_SPAN       = '</span>';
+    
+    function push() {
+        var args = Array.prototype.slice.call(arguments),
+            array = args.shift();
+        while (args.length > 0)
+            array.push(args.shift());
+    }
+    
+    function isEOL(x) {
+        return x == "\r" || x == "\n" || x == "\r\n";
+    }
+    
     function CypherHighlighter() {
-        var endMarker = "",
-            z = /(\/\*|\*\/|\/\/|\\"|"|\\'|'|\\`|`|\{[0-9A-Za-z_]+\}|<?--+>?|<?-+\[|\]-+>?|\\\\|\r|\n)/gm,
-            no = /^(0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*)$/gi,
-            co = /^(true|false|null)$/gi,
-            kw = /^(and|as|asc|create unique|create|delete|desc|distinct|in|is|is not|limit|match|or|order by|relate|return|set|skip|start|unique|where|with|={3,})$/i,
-            fn = /^(abs|any|all|avg|coalesce|collect|count|extract|filter|foreach|has|head|id|last|left|length|lower|ltrim|max|min|node|nodes|none|not|percentile_cont|percentile_disc|range|reduce|rel|relationship|relationships|replace|right|round|rtrim|shortestPath|sign|single|sqrt|str|substring|sum|tail|trim|type|upper)$/i;
+        var endMarker = "";
         this.highlight = function(code) {
-            var out = [];
+            var out = [], token;
             if (endMarker != "")
-                out.push('<span class="string">');
-            code = code.split(z);
+                out.push(STRING_SPAN);
+            code = code.split(CYPHER_CHUNKS);
             while (code.length > 0) {
-                var c = code.shift();
+                token = code.shift();
                 if (endMarker != "") {
-                    out.push(c);
-                    if (c == endMarker) {
-                        out.push('</span>');
+                    out.push(token);
+                    if (token == endMarker) {
+                        out.push(END_SPAN);
                         endMarker = "";
                     }
-                } else if (c == "//") {
-                    out.push('<span class="comment">');
-                    out.push(c);
-                    while (code.length > 0 && code[0] != "\r" && code[0] != "\n")
+                } else if (token == "//") {
+                    push(out, COMMENT_SPAN, token);
+                    while (code.length > 0 && !isEOL(code[0]))
                         out.push(code.shift());
-                    out.push(code.shift());
-                    out.push('</span>');
-                } else if (c == "'" | c == '"') {
-                    out.push('<span class="string">');
-                    out.push(c);
-                    endMarker = c;
-                } else if (c == "--" | c[0] == "<" | c[c.length - 1] == ">" | c[0] == "]" | c[c.length - 1] == "[") {
-                    out.push('<span class="pattern">');
-                    out.push(c);
-                    out.push('</span>');
-                } else if (c == "`") {
-                    out.push('<span class="escaped">');
-                    out.push(c);
-                    endMarker = c;
-                } else if (c[0] == "{") {
-                    out.push('<span class="parameter">');
-                    out.push(c);
-                    out.push('</span>');
+                    push(out, code.shift(), END_SPAN);
+                } else if (token == "'" || token == '"') {
+                    push(out, STRING_SPAN, token);
+                    endMarker = token;
+                } else if (token == "`") {
+                    push(out, ESCAPED_SPAN, token);
+                    endMarker = token;
+                } else if (token[0] == "{") {
+                    push(out, PARAMETER_SPAN, token, END_SPAN);
                 } else {
-                    c = c.split(/(create unique|is not|order by|[A-Z_][0-9A-Z_]*|={3,}|0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*)/gi);
-                    while (c.length > 0) {
-                        var d = c.shift();
-                        if (no.test(d)) {
-                            out.push('<span class="number">');
-                            out.push(d);
-                            out.push('</span>');
-                        } else if (co.test(d)) {
-                            out.push('<span class="constant">');
-                            out.push(d);
-                            out.push('</span>');
-                        } else if (kw.test(d)) {
-                            out.push('<span class="keyword">');
-                            out.push(d);
-                            out.push('</span>');
-                        } else if (fn.test(d)) {
-                            out.push('<span class="function">');
-                            out.push(d);
-                            out.push('</span>');
-                        } else {
-                            out.push(d)
+                    each(token.split(CYPHER_TOKENS), function() {
+                        for(var key in CYPHER_VOCAB) {
+                            if (CYPHER_VOCAB[key].test(this)) {
+                                push(out, '<span class="', key, '">', this, END_SPAN);
+                                return;
+                            }
                         }
-                    }
+                        out.push(this);
+                    });
                 }
             }
             if (endMarker != "")
-                out.push('</span>');
+                out.push(END_SPAN);
             return out.join("");
         }
     }
