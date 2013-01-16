@@ -3,13 +3,16 @@ function code(x, lang) {
     
     var CYPHER_CHUNKS = /(\\\\|\/\*|\*\/|\/\/|\\"|"|\\'|'|\\`|`|\{[0-9A-Z_]+\}|\r|\n)/gim,
         CYPHER_TOKENS = /(create unique|is not|order by|[A-Z_][0-9A-Z_]*|={3,}|0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*|<?--+>?|<?-+\[|\]-+>?)/gi,
-        CYPHER_VOCAB = {
+        CYPHER_VOCAB  = {
             "number":   /^(0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*)$/,
             "constant": /^(true|false|null)$/i,
             "pattern":  /^(<?--+>?|<?-+\[|\]-+>?)$/,
             "keyword":  /^(and|as|asc|create unique|create|delete|desc|distinct|in|is|is not|limit|match|or|order by|relate|return|set|skip|start|unique|where|with|={3,})$/i,
             "function": /^(abs|any|all|avg|coalesce|collect|count|extract|filter|foreach|has|head|id|last|left|length|lower|ltrim|max|min|node|nodes|none|not|percentile_cont|percentile_disc|range|reduce|rel|relationship|relationships|replace|right|round|rtrim|shortestPath|sign|single|sqrt|str|substring|sum|tail|trim|type|upper)$/i
         },
+        
+        EOL = /\r|\n|\r\n/m,
+        
         COMMENT_SPAN   = '<span class="comment">',
         ESCAPED_SPAN   = '<span class="escaped">',
         PARAMETER_SPAN = '<span class="parameter">',
@@ -23,36 +26,57 @@ function code(x, lang) {
             array.push(args.shift());
     }
     
-    function isEOL(x) {
-        return x == "\r" || x == "\n" || x == "\r\n";
+    /*
+     * Repeatedly shift items from start of array `source` and push
+     * onto end of array `sink`; end when marker `end` is found or when
+     * `source` is empty, returning true or false respectively.
+     */
+    function shiftPushUntil(source, sink, end) {
+        if (type(end) == "RegExp")
+            var stop = function(x) {
+                return x.match(end);
+            }
+        else
+            var stop = function(x) {
+                return x == end;
+            }
+        while (source.length > 0) {
+            var x = source.shift();
+            sink.push(x);
+            if (stop(x))
+                return true;
+        }
+        return false;
     }
     
     function CypherHighlighter() {
-        var endMarker = "";
+        
+        var span = null;
+        
+        function continueSpan(span, source, sink) {
+            var complete = shiftPushUntil(source, sink, span[1]);
+            sink.push(END_SPAN);
+            return complete ? null : span;
+        }
+        
         this.highlight = function(code) {
             var out = [], token;
-            if (endMarker != "")
-                out.push(STRING_SPAN);
             code = code.split(CYPHER_CHUNKS);
+            if (span) {
+                out.push(span[0]);
+                span = continueSpan(span, code, out);
+            }
             while (code.length > 0) {
                 token = code.shift();
-                if (endMarker != "") {
-                    out.push(token);
-                    if (token == endMarker) {
-                        out.push(END_SPAN);
-                        endMarker = "";
-                    }
-                } else if (token == "//") {
+                if (token == "//") {
                     push(out, COMMENT_SPAN, token);
-                    while (code.length > 0 && !isEOL(code[0]))
-                        out.push(code.shift());
-                    push(out, code.shift(), END_SPAN);
+                    span = continueSpan([COMMENT_SPAN, EOL], code, out);
                 } else if (token == "'" || token == '"') {
                     push(out, STRING_SPAN, token);
-                    endMarker = token;
+                    span = continueSpan([STRING_SPAN, token], code, out);
                 } else if (token == "`") {
                     push(out, ESCAPED_SPAN, token);
-                    endMarker = token;
+                    span = continueSpan([ESCAPED_SPAN, token], code, out);
                 } else if (token[0] == "{") {
                     push(out, PARAMETER_SPAN, token, END_SPAN);
                 } else {
@@ -67,10 +91,11 @@ function code(x, lang) {
                     });
                 }
             }
-            if (endMarker != "")
+            if (span)
                 out.push(END_SPAN);
             return out.join("");
         }
+        
     }
     
     function JavaScriptHighlighter() {

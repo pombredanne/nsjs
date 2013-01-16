@@ -75,6 +75,10 @@ RETURN n
 START person=node:Person(name = 'Anakin')
 RETURN person
 
+START person=node:Person(name = 'Mr
+Multiline')
+RETURN person
+
 START person=node:Person(name = 'Anakin')
 MATCH person-[:email]->email
 RETURN email
@@ -254,7 +258,7 @@ var editor = id("editor"),
 
 function mirror() {
     viewer.clear();
-    viewer.write(editor.value);
+    viewer.write("<code>'Here is\n</code><code>a multiline string'\n</code><code>`Here is\n</code><code>a multiline escaped string`\n</code>" + editor.value);
     code(viewer, "cypher");
 }
 
