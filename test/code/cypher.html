@@ -243,23 +243,18 @@ SET otherPerson.connection_count = foaf
 </textarea>
 </td><td style="width:50%;vertical-align:top">
 <h2>Cypher Viewer</h2>
-<code id="viewer"></pre>
+<code id="viewer" class="language-cypher"></code>
 </td></tr></table>
 
 <script>
-
-each(tag("pre"), function() {
-    if (this.hasClass("cypher"))
-        code(this, "cypher");
-});
 
 var editor = id("editor"),
     viewer = id("viewer");
 
 function mirror() {
     viewer.clear();
-    viewer.write("<code>'Here is\n</code><code>a multiline string'\n</code><code>`Here is\n</code><code>a multiline escaped string`\n</code>" + editor.value);
-    code(viewer, "cypher");
+    viewer.write(editor.value);
+    code(viewer);
 }
 
 editor.onkeyup = mirror;

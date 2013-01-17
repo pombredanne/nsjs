@@ -1,19 +1,22 @@
 
-function code(x, lang) {
+function code(element) {
     
     var CYPHER_CHUNKS = /(\\\\|\/\*|\*\/|\/\/|\\"|"|\\'|'|\\`|`|\{[0-9A-Z_]+\}|\r|\n)/gim,
         CYPHER_TOKENS = /(create unique|is not|order by|[A-Z_][0-9A-Z_]*|={3,}|0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*|<?--+>?|<?-+\[|\]-+>?)/gi,
         CYPHER_VOCAB  = {
-            "number":   /^(0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*)$/,
-            "constant": /^(true|false|null)$/i,
-            "pattern":  /^(<?--+>?|<?-+\[|\]-+>?)$/,
-            "keyword":  /^(and|as|asc|create unique|create|delete|desc|distinct|in|is|is not|limit|match|or|order by|relate|return|set|skip|start|unique|where|with|={3,})$/i,
-            "function": /^(abs|any|all|avg|coalesce|collect|count|extract|filter|foreach|has|head|id|last|left|length|lower|ltrim|max|min|node|nodes|none|not|percentile_cont|percentile_disc|range|reduce|rel|relationship|relationships|replace|right|round|rtrim|shortestPath|sign|single|sqrt|str|substring|sum|tail|trim|type|upper)$/i
+            "constant" : /^(true|false|null)$/i,
+            "function" : /^(abs|any|all|avg|coalesce|collect|count|extract|filter|foreach|has|head|id|last|left|length|lower|ltrim|max|min|node|nodes|none|not|percentile_cont|percentile_disc|range|reduce|rel|relationship|relationships|replace|right|round|rtrim|shortestPath|sign|single|sqrt|str|substring|sum|tail|trim|type|upper)$/i,
+            "keyword"  : /^(and|as|asc|create unique|create|delete|desc|distinct|in|is|is not|limit|match|or|order by|relate|return|set|skip|start|unique|where|with|={3,})$/i,
+            "number"   : /^(0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*)$/,
+            "pattern"  : /^(<?--+>?|<?-+\[|\]-+>?)$/
         },
         
-        PYTHON_CHUNKS = /(\\\\|#|\\"|"""|"|\\'|'''|'|\r|\n)/gim,
-        PYTHON_TOKENS = null,
+        PYTHON_CHUNKS = /(\\\\|#|\\"|"""|"|\\'|'''|'|\r|\n)/gm,
+        PYTHON_TOKENS = /(@?[A-Z_][0-9A-Z_]*|0\.[0-9]+j?|0j?|-?[1-9][0-9]*\.[0-9]+j?|-?[1-9][0-9]*j?)/gi,
         PYTHON_VOCAB  = {
+            "constant" : /^(False|None|True)$/,
+            "function" : /^(abs|all|any|ascii|bin|bool|bytearray|bytes|callable|chr|@?classmethod|compile|complex|delattr|dict|dir|divmod|enumerate|eval|exec|filter|float|format|frozenset|getattr|globals|hasattr|hash|help|hex|id|input|int|isinstance|issubclass|iter|len|list|locals|map|max|memoryview|min|next|object|oct|open|ord|pow|print|@?property|range|repr|reversed|round|set|setattr|slice|sorted|@?staticmethod|str|sum|super|tuple|type|vars|zip|__import__)$/,
+            "keyword"  : /^(and|as|assert|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield)$/
         },
         
         EOL = /\r|\n|\r\n/m,
@@ -24,6 +27,10 @@ function code(x, lang) {
         STRING_SPAN    = '<span class="string">',
         END_SPAN       = '</span>';
     
+    /*
+     * Push all arguments (except the first) onto the array passed
+     * as the first argument.
+     */
     function push() {
         var args = Array.prototype.slice.call(arguments),
             array = args.shift();
@@ -53,52 +60,58 @@ function code(x, lang) {
         }
         return false;
     }
+        
+    /*
+     * Continue feeding tokens from source to sink according to
+     * specification in `span` which holds a 2-tuple of
+     * (span_tag, end_marker). For example:
+     * 
+     * (STRING_SPAN, '"')
+     * 
+     */
+    function continueSpan(span, source, sink) {
+        var complete = shiftPushUntil(source, sink, span[1]);
+        sink.push(END_SPAN);
+        return complete ? null : span;
+    }
     
     function CypherHighlighter() {
         
         var span = null;
         
-        function continueSpan(span, source, sink) {
-            var complete = shiftPushUntil(source, sink, span[1]);
-            sink.push(END_SPAN);
-            return complete ? null : span;
-        }
-        
-        this.highlight = function(code) {
-            var out = [], token;
-            code = code.split(CYPHER_CHUNKS);
+        this.highlight = function(source) {
+            var sink = [], token;
+            source = source.split(CYPHER_CHUNKS);
             if (span) {
-                out.push(span[0]);
-                span = continueSpan(span, code, out);
+                sink.push(span[0]);
+                span = continueSpan(span, source, sink);
             }
-            while (code.length > 0) {
-                token = code.shift();
+            while (source.length > 0) {
+                token = source.shift();
                 if (token == "//") {
-                    push(out, COMMENT_SPAN, token);
-                    span = continueSpan([COMMENT_SPAN, EOL], code, out);
+                    push(sink, COMMENT_SPAN, token);
+                    span = continueSpan([COMMENT_SPAN, EOL], source, sink);
                 } else if (token == "'" || token == '"') {
-                    push(out, STRING_SPAN, token);
-                    span = continueSpan([STRING_SPAN, token], code, out);
+                    push(sink, STRING_SPAN, token);
+                    span = continueSpan([STRING_SPAN, token], source, sink);
                 } else if (token == "`") {
-                    push(out, ESCAPED_SPAN, token);
-                    span = continueSpan([ESCAPED_SPAN, token], code, out);
+                    push(sink, ESCAPED_SPAN, token);
+                    span = continueSpan([ESCAPED_SPAN, token], source, sink);
                 } else if (token[0] == "{") {
-                    push(out, PARAMETER_SPAN, token, END_SPAN);
+                    push(sink, PARAMETER_SPAN, token, END_SPAN);
                 } else {
                     each(token.split(CYPHER_TOKENS), function() {
                         for(var key in CYPHER_VOCAB) {
                             if (CYPHER_VOCAB[key].test(this)) {
-                                push(out, '<span class="', key, '">', this, END_SPAN);
+                                push(sink, '<span class="', key, '">', this, END_SPAN);
                                 return;
                             }
                         }
-                        out.push(this);
+                        sink.push(this);
                     });
                 }
             }
-            if (span)
-                out.push(END_SPAN);
-            return out.join("");
+            return sink.join("");
         }
         
     }
@@ -233,20 +246,20 @@ function code(x, lang) {
         }
     }
     
-    if (lang == "cypher") {
-        var hi = new CypherHighlighter();
-    } else if (lang == "javascript") {
-        var hi = new JavaScriptHighlighter();
-    } else if (lang == "python") {
-        var hi = new PythonHighlighter();
-    } else {
-        throw "Unsupported language: " + lang;
+    var cypher = new CypherHighlighter(),
+        python = new PythonHighlighter();
+    
+    function highlight() {
+        if (this.tagName != "CODE")
+            return;
+        if (this.hasClass("language-cypher"))
+            this.innerHTML = cypher.highlight(this.textContent);
+        else if (this.hasClass("language-python"))
+            this.innerHTML = python.highlight(this.textContent);
     }
     
-    x.walk(function() {
-        if (this.tagName == "CODE")
-            this.innerHTML = hi.highlight(this.textContent);
-    });
+    highlight.call(element);
+    each(tag("code", element), highlight);
     
 }
 
