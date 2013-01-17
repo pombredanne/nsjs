@@ -11,6 +11,11 @@ function code(x, lang) {
             "function": /^(abs|any|all|avg|coalesce|collect|count|extract|filter|foreach|has|head|id|last|left|length|lower|ltrim|max|min|node|nodes|none|not|percentile_cont|percentile_disc|range|reduce|rel|relationship|relationships|replace|right|round|rtrim|shortestPath|sign|single|sqrt|str|substring|sum|tail|trim|type|upper)$/i
         },
         
+        PYTHON_CHUNKS = /(\\\\|#|\\"|"""|"|\\'|'''|'|\r|\n)/gim,
+        PYTHON_TOKENS = null,
+        PYTHON_VOCAB  = {
+        },
+        
         EOL = /\r|\n|\r\n/m,
         
         COMMENT_SPAN   = '<span class="comment">',
@@ -98,71 +103,6 @@ function code(x, lang) {
         
     }
     
-    function JavaScriptHighlighter() {
-        var s = "",
-            z = /(\\"|"|\\'|'|\/\*|\*\/|\/\/|\\\/|\/|\\\\|\r|\n)/gm,
-            no = /^(0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*)$/gim,
-            kw = /^(break|case|catch|class|continue|const|debugger|default|delete|do|else|enum|export|extends|finally|for|function|if|implements|import|in|instanceof|interface|let|new|package|private|protected|public|return|static|super|switch|this|throw|try|typeof|var|void|while|with|yield)$/,
-            fn = /^(abs)$/;
-        this.highlight = function(code) {
-            var out = [];
-            if (s != "")
-                out.push('<span class="string">');
-            code = code.split(z);
-            while (code.length > 0) {
-                var c = code.shift();
-                if (s != "") {
-                    out.push(c);
-                    if (c == s) {
-                        out.push('</span>');
-                        s = "";
-                    }
-                } else {
-                    if (c == "//") {
-                        out.push('<span class="comment">');
-                        out.push(c);
-                        while (code.length > 0 && code[0] != "\r" && code[0] != "\n")
-                            out.push(code.shift());
-                        out.push(code.shift());
-                        out.push('</span>');
-                    } else if (c == "/*") {
-                        out.push('<span class="comment">');
-                        out.push(c);
-                        s = "*/";
-                    } else if (c == "'" | c == '"' | c == "/") {
-                        out.push('<span class="string">');
-                        out.push(c);
-                        s = c;
-                    } else {
-                        c = c.split(/(@?[A-Z_][0-9A-Z_]*|0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*)/gim);
-                        while (c.length > 0) {
-                            var d = c.shift();
-                            if (no.test(d)) {
-                                out.push('<span class="number">');
-                                out.push(d);
-                                out.push('</span>');
-                            } else if (kw.test(d)) {
-                                out.push('<span class="keyword">');
-                                out.push(d);
-                                out.push('</span>');
-                            } else if (fn.test(d)) {
-                                out.push('<span class="function">');
-                                out.push(d);
-                                out.push('</span>');
-                            } else {
-                                out.push(d)
-                            }
-                        }
-                    }
-                }
-            }
-            if (s != "") {
-                out.push('</span>');
-            }
-            return out.join("");
-        }
-    }
-    
     function PythonHighlighter() {
         var endMarker = "",
             z = /(#|\\"|"""|"|\\'|'''|'|\\\\|\r|\n)/gm,
@@ -224,6 +164,71 @@ function code(x, lang) {
             }
             if (endMarker != "")
                 out.push('</span>');
+            return out.join("");
+        }
+    }
+    
+    function JavaScriptHighlighter() {
+        var s = "",
+            z = /(\\"|"|\\'|'|\/\*|\*\/|\/\/|\\\/|\/|\\\\|\r|\n)/gm,
+            no = /^(0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*)$/gim,
+            kw = /^(break|case|catch|class|continue|const|debugger|default|delete|do|else|enum|export|extends|finally|for|function|if|implements|import|in|instanceof|interface|let|new|package|private|protected|public|return|static|super|switch|this|throw|try|typeof|var|void|while|with|yield)$/,
+            fn = /^(abs)$/;
+        this.highlight = function(code) {
+            var out = [];
+            if (s != "")
+                out.push('<span class="string">');
+            code = code.split(z);
+            while (code.length > 0) {
+                var c = code.shift();
+                if (s != "") {
+                    out.push(c);
+                    if (c == s) {
+                        out.push('</span>');
+                        s = "";
+                    }
+                } else {
+                    if (c == "//") {
+                        out.push('<span class="comment">');
+                        out.push(c);
+                        while (code.length > 0 && code[0] != "\r" && code[0] != "\n")
+                            out.push(code.shift());
+                        out.push(code.shift());
+                        out.push('</span>');
+                    } else if (c == "/*") {
+                        out.push('<span class="comment">');
+                        out.push(c);
+                        s = "*/";
+                    } else if (c == "'" | c == '"' | c == "/") {
+                        out.push('<span class="string">');
+                        out.push(c);
+                        s = c;
+                    } else {
+                        c = c.split(/(@?[A-Z_][0-9A-Z_]*|0\.[0-9]+|0|-?[1-9][0-9]*\.[0-9]+|-?[1-9][0-9]*)/gim);
+                        while (c.length > 0) {
+                            var d = c.shift();
+                            if (no.test(d)) {
+                                out.push('<span class="number">');
+                                out.push(d);
+                                out.push('</span>');
+                            } else if (kw.test(d)) {
+                                out.push('<span class="keyword">');
+                                out.push(d);
+                                out.push('</span>');
+                            } else if (fn.test(d)) {
+                                out.push('<span class="function">');
+                                out.push(d);
+                                out.push('</span>');
+                            } else {
+                                out.push(d)
+                            }
+                        }
+                    }
+                }
+            }
+            if (s != "") {
+                out.push('</span>');
+            }
             return out.join("");
         }
     }
